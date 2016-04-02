@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div id="report" xmlns="http://www.w3.org/1999/html">
+        <h1>Working on your report...</h1>
+        <br />
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 0%;"></div>
+        </div>
+
+        <div class="timeout clearfix" style="display: none">
+            <hr />
+            <a style="float: left; margin-right: 20px" href="http://xkcd.com/612/" target="_blank"><img src="http://imgs.xkcd.com/comics/estimation.png" /></a>
+            <h2>Oh dear. This is quite embarassing.</h2>
+            <p class="lead">It seems our progress bar filled up before we could finish your report.
+            Well, estimation can be quite hard. We'll try to get your results to you as soon as possible.
+            </p>
+        </div>
+
+    </div>
+    <script type="text/javascript">
+        $.get("{% url 'check:result_ajax' %}?{{ request.META.QUERY_STRING }}", function(data) {
+            $('#report').html(data);
+        }).fail(function() {
+            $('#report').html('<div class="alert alert-error"><h4 class="alert-heading">Server error</h4>Something appears to have gone wrong in the generation of your report. We\'ve been automatically notified, and aim to resolve this as soon as possible. Apologies for the inconvenience.');
+        });
+
+        var progress = 0;
+        increaseProgress(null);
+        function increaseProgress(event) {
+            progress += 3;
+
+            if (progress <= 100) {
+                $('.bar').css('width', progress+'%');
+            }
+            if (progress <= 130) {
+                setTimeout(increaseProgress, 400);
+            } else {
+                $('.timeout').slideDown();
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="hero-unit">
+    <img src="{{ STATIC_URL}}logo.png" style="float: right;">
+    <h1>Give your Django pony a security checkup.</h1>
+    <br />
+    <p style="margin-bottom: 35px">Are you running a Django website? Security can be tricky business, and it's easy to forget something.</p>
+    <form action="{% url 'check:result' %}" method="get" class="form-inline" >
+        <label style="margin-top: 15px; height: 5px; font-size: 30px;">Enter your domain name:</label>
+        <input style="margin-top: 15px; clear:both; height: 40px; font-size: 30px; width: 500px" placeholder="e.g. djangoproject.com" type="text" name="url" />
+        <input style="margin-top: 15px; height: 50px; font-size: 30px;" type="submit" class="btn btn-primary" value="Check up"/>
+    </form>
+    <p align="right" style="margin-right: 2em"><em>
+        Results are only reliable for Django websites.
+    </em></p>
+</div>
+
+
+<div class="row">
+    <div class="span4">
+        <h2>What is this?</h2>
+        <p class="lead"><em>Erik's Pony Checkup</em> is an automated security checkup for <a href="http://djangoproject.com">Django</a>
+            websites. There are several security practices that can easily be probed from the outside, and this is what
+            Erik's pony checkup looks for.</p>
+        <p>Knowing what's wrong is only the first step:
+            Erik's Pony Checkup helps by explaining not just the risks, but also how to best fix an issue.</p>
+        <p>This is by no means a perfect system. <em>This is not a replacement for a full security audit.</em> But it is a
+            simple and fast way of seeing the basic pressing issues. Do note that there are many vulnerabilities which
+            can not be detected in this way, like SQL or XSS injection.</p>
+    </div>
+    <div class="span4">
+        <h2>Why did you build this?</h2>
+        <p class="lead">To help <a href="http://www.erik.io/blog/2013/12/15/appeal-for-security-for-the-ordinary-developer/">the ordinary developer</a>
+            with securing their Django projects.
+            In June 2012, I spoke at <a href="http://2012.djangocon.eu">Djangocon EU</a>
+            about Building secure Django websites
+            (<a href="http://klewel.com/conferences/djangocon-2012/index.php?talkID=7">video</a>/<a href="https://speakerdeck.com/u/erik/p/building-secure-django-websites">slides</a>)
+            which met with great response. I was inspired to build this tool by Jessica McKellar's
+            <a href="http://klewel.com/conferences/djangocon-2012/index.php?talkID=35">keynote</a>, in which
+            she explained how hard all this can be for people new to Django.</p>
+        <p>In addition, many experienced Django developers approached me after my talk to admit that they had made
+            some of the errors I mentioned. Someone even made a serious error on stage the next day. This, combined with the fact
+            that quite a few things can easily be checked remotely with a few HTTP requests, inspired me to build this.</p>
+    </div>
+    <div class="span4">
+        <h2>Who built this?</h2>
+        <p class="lead">I'm <a href="http://twitter.com/erikpub">Erik Romijn</a>, App Maker from Amsterdam, The Netherlands.
+            I make mobile and web apps. I do a mix of freelance work and independent projects, mostly with Django and iOS. </p>
+        <p>I live in the city of <a href="http://appsterdam.rs/">Appsterdam</a>, where we are
+            working to create the best place in the world to be or become an App Maker.</p>
+
+    </div>
+</div>
+
+{% endblock %}

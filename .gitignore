@@ -1,0 +1,21 @@
+# automatically created files:
+.DS_Store
+
+virtualenv/
+.idea/workspace.xml
+
+# other
+static
+build
+.idea
+_build
+.coverage
+htmlcov
+celery.pid
+selenium-screenshots/
+
+syntax: glob
+/media
+*.pyc
+*.swp
+*.sqlite3

@@ -1,0 +1,326 @@
+{% load static %}
+<h1>Pony checkup report for {{ check_record.url }}</h1>
+<br />
+
+<form style="float: left; margin-right: 15px" action="{% url 'check:result' %}" method="get" class="form-inline">
+    <label>Check another URL:</label>
+    <input type="text" name="url" />
+    <input type="submit" class="btn btn-primary" value="Check up"/>
+</form>
+
+<a href="https://twitter.com/share" class="twitter-share-button" data-text="I just found {{ check_record.no_of_recommendations }} way{{ check_record.no_of_recommendations|pluralize }} to improve the security of my #django app with @ponycheckup: http://ponycheckup.com{% url 'check:result' %}?url={{ check_record.url }}" data-size="large" data-count="none">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<a href="https://twitter.com/ponycheckup" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ponycheckup</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+<div style="clear:both"></div>
+
+{% if reused_existing_object %}
+    <p>These results you see are cached. They were last updated {{ check_record.created|timesince }} ago.
+        <a href="{% url 'check:result' %}?url={{ check_record.url }}&force_refresh=1">Click here to force a refresh.</a></p>
+{% endif %}
+
+{% if could_not_load %}
+    <div class="alert alert-error">
+        <h4 class="alert-heading">Failed to load page</h4>
+        We couldn't load the page you requested, possibly due to an improper SSL configuration, or we don't consider it a valid URL.<br />
+        The exception we got is: {{ error }}
+    </div>
+{% else %}
+
+    <div class="well">
+        <h3>Overall score</h3>
+        <div class="alert alert-{% if score_good %}success{% elif score_warning %}block{% else %}error {% endif %}" style="font-size: 150%; line-height: 100%">
+            We found {{ check_record.no_of_recommendations|default:"no" }} way{{ check_record.no_of_recommendations|pluralize }}
+            you could improve the security of this website.
+            Your overall rating is <strong>{{ check_record.secure_percentage }}%</strong>.
+        </div>
+        {% if check_record.proven_django %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading">We think this site runs Django</h4>
+                We've found at least one of the typical Django-tells, so we're pretty confident that this site
+                does really run Django. However, it is possible to imitate these, so we can't be 100% sure.
+            </div>
+        {% else %}
+            <div class="alert alert-block">
+                <h4 class="alert-heading">We don't know whether this site runs Django</h4>
+                We're not sure whether this site actually runs Django, because we haven't found any of the
+                typical Django-tells. But in many situations none of these show, and there is no way to be
+                sure that this is a Django site.
+            </div>
+        {% endif %}
+        <p>Note that the results of this test are only valid for websites that actually run Django -
+            otherwise the test will generate some false positives.</p>
+    </div>
+
+
+    <div class="well">
+        <h3>HTTPS</h3>
+        {% if check_record.supports_https %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> HTTPS available</h4>
+                We were able to connect to your website using HTTPS.
+                Note that this does not perform any checks of the configured ciphers.
+                If you'd like to get a more detailed analysis, use the
+                <a href="https://www.ssllabs.com/ssltest/index.html">Qualys SSL Labs SSL test</a>.
+            </div>
+        {% else %}
+            <div class="alert alert-block">
+                <h4 class="alert-heading"><i class="icon-exclamation-sign"></i> HTTPS not available</h4>
+                We were unable to connect to your website over HTTPS. This is only acceptable if your website
+                uses no confidential information of any kind, so no logins, forms for which the contents need
+                to be confidential and no admin interface. The SSL failure could be due to a variety of reasons:
+                it could be that you simply have no SSL set up, or that your certificate is invalid.
+                The best way to resolve this is to enable SSL in your web server, and make sure it is
+                properly configured.
+            </div>
+        {% endif %}
+        <p>HTTP using SSL (Secure Sockets Layer) encrypts the traffic between your web server and it's
+            clients. This means the traffic, even if intercepted, can not be decoded by an attacker.
+            This is important if there is any kind of confidential information on your site, so basically
+            any site that uses logins.</p>
+    </div>
+
+    <div class="well">
+        <h3>Heartbleed bug</h3>
+        {% if not check_record.heartbleed_vuln %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Not vulnerable to Heartbleed</h4>
+                You do not appear to be vulnerable to the Heartbleed bug.
+            </div>
+        {% else %}
+            <div class="alert alert-error">
+                <h4 class="alert-heading"><i class="icon-remove"></i> VULNERABLE TO HEARTBLEED</h4>
+                You appear vulnerable to the Heartbleed bug. DROP WHATEVER YOU ARE DOING, AND CHECK/UPGRADE YOUR OPENSSL
+                INSTALLATION IMMEDIATELY. I can not stress the urgency of this enough.
+                Once you have upgraded your OpenSSL and rebooted, you must assume all your private SSL keys, session IDs,
+                secret keys and passwords to be compromised. Make sure to replace all of these.
+            </div>
+        {% endif %}
+        <p>The <a href="http://heartbleed.com">Heartbleed bug</a> is a very serious vulnerability in OpenSSL 1.0.1
+            versions prior to Openssl 1.0.1g. It can allow an attacker to retrieve memory contents, without leaving
+            a trace. It can reveal private SSL keys, session IDs, passwords and other sensitive information. This is
+            not a theoretical risk: the author has personally managed to steal Django session IDs with this bug
+            without fail, in mere seconds.</p>
+    </div>
+
+    <div class="well">
+        <h3>Debug mode</h3>
+        {% if not check_record.runs_debug %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Not running in debug mode</h4>
+                As far as we can tell, you have not enabled <em>DEBUG</em> on this website.
+                That's a good thing, because <em>DEBUG</em> should only be used for... debugging.
+            </div>
+        {% else %}
+            <div class="alert alert-error">
+                <h4 class="alert-heading"><i class="icon-remove"></i> Running in debug mode</h4>
+                It looks like you're running with <em>DEBUG</em> enabled, which is a bad security practice.
+                To quote the
+                <a href="https://docs.djangoproject.com/en/dev/ref/settings/#debug">manual</a>:
+                <em>Did you catch that? NEVER deploy a site into production with DEBUG turned on.</em>.
+            </div>
+        {% endif %}
+        <p>The Django <a href="https://docs.djangoproject.com/en/dev/ref/settings/#debug">debug mode</a>
+            helps in debugging, mainly by showing very detailed error pages. These error pages contain
+            very detailed tracebacks, most settings and all sorts of other data about your environment
+            that can be helpful in debugging. You should never enable this on a production site, because
+            it gives out tons of internal information.</p>
+    </div>
+
+    <div class="well">
+        <h3>HTTPS in admin</h3>
+        {% if check_record.admin_found and check_record.admin_forces_https %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Admin forces HTTPS</h4>
+                We found an admin on <em>/admin</em>, and it enforces the use of HTTPS.
+                This is good, because it means you can not accidentally log in without encryption.
+            </div>
+        {% elif check_record.admin_found and not check_record.admin_forces_https %}
+            <div class="alert alert-error">
+                <h4 class="alert-heading"><i class="icon-remove"></i> Admin not forcing HTTPS</h4>
+                We found an admin on <em>/admin</em>, but it does not enforce the use of HTTPS. This is a bad security
+                practice even if HTTPS is available, because it makes it easy to make an error and accidentally
+                submit confidential information or authentication without encryption.
+                You can force the use of HTTPS by configuring your web server, or adding using the middleware from
+                <a href="http://pypi.python.org/pypi/django-secure">django-secure</a>.
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <h4 class="alert-heading"><i class="icon-info-sign"></i> Admin not found</h4>
+                We could not find an admin on <em>/admin</em>.
+            </div>
+        {% endif %}
+        <p>The <a href="https://docs.djangoproject.com/en/dev/ref/contrib/admin/">Django admin site</a> is a
+            component shipped with Django to administer the data in your database. Obviously, this is an incredibly
+            powerful interface, for which authorisation should not fall in the wrong hands. Therefore, if you use the
+            admin, you should always use HTTPS, to make sure logins or other data can not be intercepted.</p>
+    </div>
+
+    <div class="well">
+        <h3>HTTPS for logins</h3>
+        {% if check_record.login_found and check_record.login_forces_https %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Login forces HTTPS</h4>
+                We found a login form on <em>/accounts/login</em> or <em>/login</em>, and it enforces the use of HTTPS.
+                This is good, because it means you can not accidentally log in without encryption.
+            </div>
+        {% elif check_record.login_found and not check_record.login_forces_https %}
+            <div class="alert alert-error">
+                <h4 class="alert-heading"><i class="icon-remove"></i> Login not forcing HTTPS</h4>
+                We found a login form on <em>/accounts/login</em> or <em>/login</em>, but it does not enforce the use of HTTPS. This is a
+                bad security practice even if HTTPS is available, because it makes it easy to make an error and accidentally
+                submit confidential information or authentication without encryption.
+                You can force the use of HTTPS by configuring your web server, or adding using the middleware from
+                <a href="http://pypi.python.org/pypi/django-secure">django-secure</a>.
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <h4 class="alert-heading"><i class="icon-info-sign"></i> Login not found</h4>
+                We could not find a login form on <em>/accounts/login</em> or <em>/login</em>.
+            </div>
+        {% endif %}
+        <p>If you use <a href="https://docs.djangoproject.com/en/dev/topics/auth/">Django's authentication</a>,
+            you should be securing it with HTTPS. After all, if something is worth hiding behind a username and password, it's
+            worth protecting from traffic interception.</p>
+    </div>
+
+    <div class="well">
+        <h3>Session cookie</h3>
+        {% if check_record.session_cookie_found and check_record.session_cookie_secure and check_record.session_cookie_httponly %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Session cookie secure and HTTPonly</h4>
+                We discovered a session cookie, <em>sessionid</em> and it has both the secure and HTTPOnly flags set.
+                This helps protect the session cookie from a variety of attacks.
+            </div>
+        {% elif check_record.session_cookie_found and not check_record.session_cookie_secure and check_record.session_cookie_httponly %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Session cookie HTTPonly</h4>
+                Your session cookie has the HTTPOnly flag set. This means it is not available to javascript code.
+                This is good, as otherwise it could be accessed in cross-site scripting attacks.
+            </div>
+        {% elif check_record.session_cookie_found and check_record.session_cookie_secure and not check_record.session_cookie_httponly %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Session cookie secure</h4>
+                Your session cookie has the secure flag set. This means the session cookie is not sent over
+                plain HTTP connections, but only over HTTPS, protecting it from interception.
+            </div>
+        {% endif %}
+        {% if check_record.session_cookie_found and not check_record.session_cookie_secure %}
+            <div class="alert alert-error">
+                <h4 class="alert-heading"><i class="icon-remove"></i> Session cookie not secure</h4>
+                Your Django session cookie, <em>sessionid</em>, does not have the secure-flag set. This means it will
+                also be sent over non-HTTPS connections, during which it is much easier to intercept. This is only
+                a valid practice if you are absolutely sure that interception of the session cookie does not matter
+                to you, e.g. if you are only using the session to keep track of the user's language preference.
+                You can have Django resolve this by setting <em>SESSION_COOKIE_SECURE</em>, but make sure
+                that all requests that use the session are forced over HTTPS, because the cookie and therefore
+                the session will become invisible to plain HTTP requests.
+            </div>
+        {% endif %}
+        {% if check_record.session_cookie_found and not check_record.session_cookie_httponly %}
+            <div class="alert alert-error">
+                <h4 class="alert-heading"><i class="icon-remove"></i> Session cookie not using httponly</h4>
+                Your Django session cookie, <em>sessionid</em>, does not have the HTTPOnly-flag set. This means it is
+                available in javascript code. This can be used in cross-site scripting attacks. There is rarely a
+                good reason to keep HTTPOnly disabled (AJAX still works with HTTPOnly). You can enable the flag by
+                setting <em>SESSION_COOKIE_HTTPONLY</em> in your Django settings.
+            </div>
+        {% endif %}
+        {% if not check_record.session_cookie_found %}
+            <div class="alert alert-info">
+                <h4 class="alert-heading"><i class="icon-info-sign"></i> Session cookie not found</h4>
+                We could not find a session cookie. Perhaps you're not using sessions, or you've changed the name
+                of the cookie by setting <em>SESSION_COOKIE_NAME</em>.
+            </div>
+        {% endif %}
+        <p>The <a href="https://docs.djangoproject.com/en/dev/topics/http/sessions/">session cookie</a> is
+            used to recognize the same client between different requests. Having access to an authenticated
+            user's session ID is almost as good as having their username and password. Therefore, it is
+            vital to protect the session cookie.</p>
+    </div>
+
+    <div class="well">
+        <h3>Clickjacking protection</h3>
+        {% if check_record.xframe_header_found %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Clickjacking protection header found</h4>
+                We found a <em>X-Frame-Options</em> header, which means protection against clickjacking is enabled.
+            </div>
+        {% else %}
+            <div class="alert alert-error">
+                <h4 class="alert-heading"><i class="icon-remove"></i> Clickjacking protection header missing</h4>
+                We could not find a <em>X-Frame-Options</em> header, which means protection against clickjacking
+                is not enabled. In Django 1.4, you can enable the <em>django.middleware.clickjacking.XFrameOptionsMiddleware</em>
+                middleware for this.
+            </div>
+        {% endif %}
+        <p>Clickjacking is an attack where one website is transparently overlayed on top of another website.
+            The user thinks they are manipulating the website they see, but in reality their actions go to
+            the invisible website. This depends on the invisible website being placed in a HTML frame. To prevent
+            this, you can set the <em>X-Frame-Options</em> header. This tells the browser not to permit your website
+            to be embedded in HTML frames. Django 1.4 ships with
+            <a href="https://docs.djangoproject.com/en/dev/ref/clickjacking/">clickjacking protection middleware</a>.
+            to help you do this.</p>
+    </div>
+
+    <div class="well">
+        <h3>HTTP strict transport security</h3>
+        {% if check_record.supports_https %}
+            {% if check_record.hsts_header_found %}
+                <div class="alert alert-success">
+                    <h4 class="alert-heading"><i class="icon-ok"></i> HSTS header found</h4>
+                    You have enabled HTTP strict transport security, because we found the <em>Strict-Transport-Security</em>
+                    header. This gives you an extra layer of protection against interception of unencrypted traffic.
+                </div>
+            {% else %}
+                <div class="alert alert-block">
+                    <h4 class="alert-heading"><i class="icon-exclamation-sign"></i> HSTS header not found</h4>
+                    We could not find the <em>Strict-Transport-Security</em> header, meaning you have not enabled
+                    HTTP strict transport security. HSTS gives you an extra layer of protection against interception of
+                    unencrypted traffic. You can enable HSTS headers by using the middleware from
+                    <a href="http://pypi.python.org/pypi/django-secure">django-secure</a>, or by adding
+                    configuration to your web server.
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">
+                <h4 class="alert-heading"><i class="icon-info-sign"></i> Not checked</h4>
+                We did not check for HTTP strict transport security, because it seems your website does not
+                support SSL, making it of no use.
+            </div>
+        {% endif %}
+        <p>HTTP strict transport security is basically a way of telling the browser: never load this site over
+            HTTP and never allow it to be loaded when the HTTPS certificates are doubtful in some way. There's an
+            expiry time for how long the browser remembers this. This is a good added layer of protection, next to
+            simply redirecting all HTTP requests to HTTPS. You'll still have to do the latter, because not all
+            browsers support HSTS. HSTS middleware is not included in Django, but you can use
+            <a href="http://pypi.python.org/pypi/django-secure">django-secure</a>'s middleware.
+            For a good in-depth explanation of HSTS, see
+            <a href="http://www.imperialviolet.org/2012/07/19/hope9talk.html">Adam Langley's blog</a>.</p>
+    </div>
+
+    <div class="well">
+        <h3>TRACE method</h3>
+        {% if not check_record.allows_trace %}
+            <div class="alert alert-success">
+                <h4 class="alert-heading"><i class="icon-ok"></i> Web server does not allow TRACE</h4>
+                Your web server refuses the TRACE method. This is a good thing, as it rarely serves a purpose,
+                and can be used in cross-site scripting attacks.
+            </div>
+        {% else %}
+            <div class="alert alert-error">
+                <h4 class="alert-heading"><i class="icon-remove"></i> Web server allows TRACE</h4>
+                Your web server allows the TRACE method. This is not good, as it rarely serves a purpose,
+                and can be used in cross-site scripting attacks.
+            </div>
+        {% endif %}
+        <p>The TRACE method is a rarely used HTTP request method. Basically, it asks the webserver
+            to return the exact request as it was received. This can be used in cross-site scripting,
+            to retrieve the session cookie. TRACE is intended for debugging, but very rarely used, so it's
+            a good practice to disable it. You can always re-enable it later if you do need it.</p>
+    </div>
+
+
+{% endif %}

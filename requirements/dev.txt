@@ -1,0 +1,4 @@
+-r base.txt
+django-debug-toolbar==0.11.0
+werkzeug==0.9.4
+mock==1.0.1

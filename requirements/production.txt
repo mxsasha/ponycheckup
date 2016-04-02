@@ -1,0 +1,6 @@
+-r base.txt
+psycopg2==2.5.1
+gunicorn==18.0
+ndg-httpsclient==0.3.2
+pyasn1==0.1.7
+pyOpenSSL==0.14
