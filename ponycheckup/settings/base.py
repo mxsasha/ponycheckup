@@ -72,9 +72,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 INSTALLED_APPS = (
     'django.contrib.staticfiles',
-
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
     'django_extensions',
-    'south',
 
     'ponycheckup.check',
 )
