@@ -1,5 +1,5 @@
 Django==1.10.6
-django-extensions==1.7.7
+django-extensions==1.7.8
 south==1.0.2
 unipath==1.1
 requests==2.13.0
