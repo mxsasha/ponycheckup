@@ -1,4 +1,4 @@
-Django==1.9.5
+Django==1.9.13
 django-extensions==1.6.1
 south==1.0.2
 unipath==1.1
