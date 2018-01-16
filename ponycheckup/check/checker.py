@@ -16,7 +16,7 @@ except ImportError:
 class SecurityChecker(object):
     def run_check(self, url):
         self.session = requests.session()
-        self.session.headers = [('User-agent', "Erik's pony checkup - http://ponycheckup.com/")]
+        self.session.headers = [('User-agent', "Sasha's pony checkup - http://ponycheckup.com/")]
 
         try:
             homepage = self.session.get(url, timeout=7)

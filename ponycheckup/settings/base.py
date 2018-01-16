@@ -8,11 +8,11 @@ DEBUG = False
 TEMPLATE_DEBUG = False
 
 ADMINS = (
-    ('Erik Romijn', 'eromijn@solidlinks.nl'),
+    ('Sasha Romijn', 'github@mxsasha.eu'),
 )
 MANAGERS = ADMINS
 
-DEFAULT_FROM_EMAIL = "info@solidlinks.nl"
+DEFAULT_FROM_EMAIL = "github@mxsasha.eu"
 
 SITE_ID = 1
 
