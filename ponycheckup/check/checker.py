@@ -40,7 +40,12 @@ class SecurityChecker(object):
             if session_cookie:
                 check_record.session_cookie_found    = True
                 check_record.session_cookie_secure   = session_cookie.secure
-                check_record.session_cookie_httponly = session_cookie.has_nonstandard_attr('httponly')
+                check_record.session_cookie_httponly = (
+                    # python 2 and up to 3.3 will produce the attribute as 'httponly'.
+                    # python 3.4 and up as 'HttpOnly'.
+                    session_cookie.has_nonstandard_attr('httponly')
+                    or session_cookie.has_nonstandard_attr('HttpOnly')
+                )
             else:
                 check_record.session_cookie_found    = False
 
