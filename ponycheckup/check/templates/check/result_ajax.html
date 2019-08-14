@@ -143,8 +143,8 @@
                 We found an admin on <em>/admin</em>, but it does not enforce the use of HTTPS. This is a bad security
                 practice even if HTTPS is available, because it makes it easy to make an error and accidentally
                 submit confidential information or authentication without encryption.
-                You can force the use of HTTPS by configuring your web server, or adding using the middleware from
-                <a href="http://pypi.python.org/pypi/django-secure">django-secure</a>.
+                You can force the use of HTTPS by configuring your web server, or by 
+                setting <a href="https://docs.djangoproject.com/en/2.2/topics/security/#ssl-https">SECURE_SSL_DIRECT = True in your settings.py</a>
             </div>
         {% else %}
             <div class="alert alert-info">
@@ -172,8 +172,8 @@
                 We found a login form on <em>/accounts/login</em> or <em>/login</em>, but it does not enforce the use of HTTPS. This is a
                 bad security practice even if HTTPS is available, because it makes it easy to make an error and accidentally
                 submit confidential information or authentication without encryption.
-                You can force the use of HTTPS by configuring your web server, or adding using the middleware from
-                <a href="http://pypi.python.org/pypi/django-secure">django-secure</a>.
+                You can force the use of HTTPS by configuring your web server, or by 
+                enabling <a href="https://docs.djangoproject.com/en/2.2/topics/security/#ssl-https">SECURE_SSL_DIRECT</a> in your settings.py.
             </div>
         {% else %}
             <div class="alert alert-info">
@@ -279,9 +279,8 @@
                     <h4 class="alert-heading"><i class="icon-exclamation-sign"></i> HSTS header not found</h4>
                     We could not find the <em>Strict-Transport-Security</em> header, meaning you have not enabled
                     HTTP strict transport security. HSTS gives you an extra layer of protection against interception of
-                    unencrypted traffic. You can enable HSTS headers by using the middleware from
-                    <a href="http://pypi.python.org/pypi/django-secure">django-secure</a>, or by adding
-                    configuration to your web server.
+                    unencrypted traffic. You can enable HSTS headers by configuring 
+                    <a href="https://docs.djangoproject.com/en/2.2/topics/security/#ssl-https">SECURE_HSTS_SECONDS, SECURE_HSTS_INCLUDE_SUBDOMAINS, and SECURE_HSTS_PRELOAD, </a> in your settings.py, or by configuring your web server. 
                 </div>
             {% endif %}
         {% else %}
@@ -295,8 +294,7 @@
             HTTP and never allow it to be loaded when the HTTPS certificates are doubtful in some way. There's an
             expiry time for how long the browser remembers this. This is a good added layer of protection, next to
             simply redirecting all HTTP requests to HTTPS. You'll still have to do the latter, because not all
-            browsers support HSTS. HSTS middleware is not included in Django, but you can use
-            <a href="http://pypi.python.org/pypi/django-secure">django-secure</a>'s middleware.
+            browsers support HSTS. HSTS middleware available in <a href="https://docs.djangoproject.com/en/dev/ref/middleware/#http-strict-transport-security">recent versions of Django</a>.
             For a good in-depth explanation of HSTS, see
             <a href="http://www.imperialviolet.org/2012/07/19/hope9talk.html">Adam Langley's blog</a>.</p>
     </div>
